@@ -14,12 +14,14 @@ namespace lisandroct.EventSystem
         private string EventsPath { get; }
         private string EventsInspectorsPath { get; }
         private string ListenersPath { get; }
+        private string DetectorsPath { get; }
         
-        public CodeGenerator(string eventsPath, string eventsInspectorsPath, string listenersPath)
+        public CodeGenerator(string eventsPath, string eventsInspectorsPath, string listenersPath, string detectorsPath)
         {
             EventsPath = eventsPath;
             EventsInspectorsPath = eventsInspectorsPath;
             ListenersPath = listenersPath;
+            DetectorsPath = detectorsPath;
         }
         
         public void Generate(string name, Type[] types)
@@ -36,10 +38,12 @@ namespace lisandroct.EventSystem
             var eventUnit = GenerateEvent(name, types);
             var eventInspectorUnit = GenerateEventInspector(name, types);
             var listenerUnit = GenerateListener(name, types);
+            var detectorUnit = GenerateDetector(name, types);
 
             GenerateCsFile(EventsPath, eventUnit);
             GenerateCsFile(EventsInspectorsPath, eventInspectorUnit);
             GenerateCsFile(ListenersPath, listenerUnit);
+            GenerateCsFile(DetectorsPath, detectorUnit);
         }
         
         private static CodeCompileUnit GenerateEvent(string name, Type[] types)
@@ -113,7 +117,19 @@ namespace lisandroct.EventSystem
 
             return compileUnit;
         }
-
+        
+        private static CodeCompileUnit GenerateDetector(string name, Type[] types)
+        {
+            var className = $"{name}Detector";
+            
+            var compileUnit = CreateCompileUnit();
+            var codeNamespace = AddNamespace(compileUnit);
+            var codeClass = AddClass(className, codeNamespace);
+            AddParentType(codeClass, typeof(Detector), types);
+            
+            return compileUnit;
+        }
+        
         private static CodeCompileUnit CreateCompileUnit() => new CodeCompileUnit();
 
         private static CodeNamespace AddNamespace(CodeCompileUnit compileUnit)
